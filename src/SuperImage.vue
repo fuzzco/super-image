@@ -143,7 +143,7 @@ export default {
             const styles = {}
 
             // set max dims if needed
-            if (this['respect-max']) {
+            if (this.respectMax) {
                 styles['max-width'] = `${this.parsedWidth}px`
                 styles['max-height'] = `${this.parsedHeight}px`
             }

@@ -5,7 +5,9 @@
     "main": "dist/super-image.common.js",
     "scripts": {
         "dev": "vue-cli-service serve demo/main",
-        "build": "vue-cli-service build --target lib --name super-image src/SuperImage.vue",
+        "buildDemo": "vue-cli-service build --dest docs demo/main",
+        "buildLib": "vue-cli-service build --target lib --name super-image src/SuperImage.vue",
+        "build": "npm run buildDemo && npm run buildLib",
         "prepublish": "npm run build"
     },
     "keywords": [],
