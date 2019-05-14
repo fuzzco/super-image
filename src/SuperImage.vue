@@ -130,7 +130,8 @@ export default {
                 { 'image-loading': this.loading },
                 { 'image-loaded': !this.loading },
                 { 'fill-space': this.fillSpace },
-                { 'has-video': this.videoSrc }
+                { 'has-video': this.videoSrc },
+                { 'has-image': this.src }
             ]
         },
         imageTag() {
@@ -221,7 +222,7 @@ export default {
     }
 
     // loading state
-    &.image-loading .image-sizer {
+    &.image-loading.has-image .image-sizer {
         opacity: 0;
     }
 }
