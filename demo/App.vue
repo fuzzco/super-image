@@ -2,6 +2,20 @@
     <main class="demo">
         <h2 class="title">super-image</h2>
 
+        <super-image src="//placehold.it/300x300" respect-max aspect="56.25" />
+        <p>Square image forced to aspect ratio</p>
+
+        <super-image :html="imgHtml" width="300" respect-max height="300" />
+        <p>Raw HTML and auto-calculated aspect ratio</p>
+
+        <!-- fit wrapper -->
+        <div class="resizable">
+            <div class="container">
+                <super-image src="//placehold.it/300x300" fill-space />
+            </div>
+        </div>
+        <p>Resizable with fill-space</p>
+
         <!-- new key forces a reload on prop change -->
         <super-image
             :src="`//placehold.it/${width}x${height}`"
@@ -32,7 +46,9 @@ export default {
         return {
             width: 500,
             height: 500,
-            respectMax: true
+            respectMax: true,
+            imgHtml:
+                '<img src="//placehold.it/300x300" width="300" height="300">'
         }
     },
     computed: {
@@ -60,14 +76,24 @@ export default {
     max-width: 700px;
     margin: auto;
 
-    .super-image {
-        margin: 0 auto;
+    .resizable {
+        resize: both;
+        width: 100px;
+        height: 100px;
+        position: relative;
+        overflow: scroll;
+        margin: 50px auto 0;
+        padding: 10px;
+        background: tomato;
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
     }
+
     .controls {
-        position: fixed;
-        right: 0;
-        bottom: 0;
-        left: 0;
         padding: 30px;
         background: rgba(#efefef, 0.4);
         display: grid;
@@ -77,6 +103,16 @@ export default {
         button {
             font-size: inherit;
         }
+    }
+
+    & > * {
+        margin-top: 50px;
+    }
+    & > p {
+        margin-top: 20px;
+    }
+    .controls {
+        margin-top: 0;
     }
 }
 </style>

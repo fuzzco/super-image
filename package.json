@@ -1,6 +1,6 @@
 {
     "name": "@fuzzco/super-image",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "All-in-one image component for Vue.",
     "main": "dist/super-image.common.js",
     "scripts": {
