@@ -135,7 +135,7 @@ export default {
             ]
         },
         imageTag() {
-            const fallback = `<img src="${this.src}" alt="${this.alt}">`
+            const fallback = `<img src="${this.src}" alt="${this.alt || ' '}">`
             if (this.html) return this.html
             else return fallback
         },
