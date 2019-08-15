@@ -64,6 +64,10 @@ export default {
         useCanvas: {
             type: Boolean,
             default: false
+        },
+        noImageAfterCanvas: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -206,11 +210,15 @@ export default {
             return {}
         },
         cmpCanvas() {
-            return `<canvas
+            let output = `<canvas
                 class="super-image-canvas"
                 width="${this.parsedWidth}px"
-                height="${this.parsedWidth}px"></canvas>
-                ${this.fallbackHtml}`
+                height="${this.parsedWidth}px"></canvas>`
+
+            if (!this.noImageAfterCanvas) {
+                output += this.fallbackHtml
+            }
+            return output
         }
     }
 }
