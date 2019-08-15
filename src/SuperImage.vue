@@ -60,13 +60,18 @@ export default {
         loop: {
             type: Boolean,
             default: true
+        },
+        useCanvas: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
         return {
             loading: true,
             imageWidth: 0,
-            imageHeight: 0
+            imageHeight: 0,
+            img: null
         }
     },
     watch: {
@@ -80,8 +85,8 @@ export default {
         // ignore if our src is undefined
         if (!this.src) return
 
-        const img = new Image()
-        img.src = this.src
+        this.img = new Image()
+        this.img.src = this.src
 
         // define loading complete handler
         const onComplete = async () => {
@@ -89,29 +94,49 @@ export default {
             this.loading = false
 
             // update stats
-            this.imageWidth = img.width
-            this.imageHeight = img.height
+            this.imageWidth = this.img.width
+            this.imageHeight = this.img.height
+
+            // update canvas
+            if (this.useCanvas) {
+                await this.$nextTick()
+                this.refreshCanvas()
+            }
         }
 
         // image was already in cache,
         // handle complete immediately
-        if (img.complete) {
+        if (this.img.complete) {
             onComplete()
         } else {
             // wait for image to load...
-            imagesLoaded(img, onComplete)
+            imagesLoaded(this.img, onComplete)
         }
 
         this.setMediaClass()
     },
     methods: {
         setMediaClass() {
-            // give the "media" class to whatever we are rendering (img or video)
+            // give the "media" class to whatever we are rendering (img, video, or canvas)
             if (!this.$el || !this.$el.querySelector) return
             this.$nextTick(() => {
                 const media = this.$el.querySelector('.image-sizer > *')
                 if (media) media.classList.add('media')
             })
+        },
+        refreshCanvas() {
+            const canvas = this.$el.querySelector('canvas')
+
+            // cancel if no canvas
+            if (!canvas) return
+
+            // set to image size
+            canvas.width = this.parsedWidth
+            canvas.height = this.parsedHeight
+
+            // get context
+            const ctx = canvas.getContext('2d')
+            ctx.drawImage(this.img, 0, 0)
         }
     },
     computed: {
@@ -134,10 +159,13 @@ export default {
                 { 'has-image': this.src }
             ]
         },
+        fallbackHtml() {
+            return `<img src="${this.src}" alt="${this.alt || ' '}">`
+        },
         imageTag() {
-            const fallback = `<img src="${this.src}" alt="${this.alt || ' '}">`
             if (this.html) return this.html
-            else return fallback
+            else if (this.useCanvas) return this.cmpCanvas
+            else return this.fallbackHtml
         },
         outerStyles() {
             const styles = {}
@@ -176,6 +204,13 @@ export default {
                 }
             }
             return {}
+        },
+        cmpCanvas() {
+            return `<canvas
+                class="super-image-canvas"
+                width="${this.parsedWidth}px"
+                height="${this.parsedWidth}px"></canvas>
+                ${this.fallbackHtml}`
         }
     }
 }
@@ -219,6 +254,12 @@ export default {
         width: 100%;
         left: 0;
         top: 0;
+    }
+
+    // hide canvas overlay
+    .super-image-canvas + img {
+        opacity: 0;
+        pointer-events: none;
     }
 
     // loading state

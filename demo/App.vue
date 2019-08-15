@@ -32,6 +32,9 @@
                 <label for="respectMax"><code>respect-max</code></label>
             </div>
         </div>
+
+        <!-- canvas for easier manipulation -->
+        <super-image src="//placehold.it/400x200" use-canvas />
     </main>
 </template>
 
