@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "imagesloaded": "^4.1.4",
+        "phenomenon": "^1.5.1",
         "vue": "^2.6.10"
     }
 }

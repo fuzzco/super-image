@@ -23,6 +23,7 @@
 
 <script>
 let imagesLoaded
+let Phenomenon
 
 export default {
     name: 'super-image',
@@ -68,6 +69,18 @@ export default {
         noImageAfterCanvas: {
             type: Boolean,
             default: false
+        },
+        useShader: {
+            type: Boolean,
+            default: false
+        },
+        uniforms: {
+            type: Object,
+            default: () => {}
+        },
+        onShaderUpdate: {
+            type: Function,
+            default: () => () => {}
         }
     },
     data() {
@@ -75,7 +88,8 @@ export default {
             loading: true,
             imageWidth: 0,
             imageHeight: 0,
-            img: null
+            img: null,
+            alive: true
         }
     },
     watch: {
@@ -102,7 +116,7 @@ export default {
             this.imageHeight = this.img.height
 
             // update canvas
-            if (this.useCanvas) {
+            if (this.useCanvas || this.useShader) {
                 await this.$nextTick()
                 this.refreshCanvas()
             }
@@ -138,9 +152,75 @@ export default {
             canvas.width = this.parsedWidth
             canvas.height = this.parsedHeight
 
-            // get context
-            const ctx = canvas.getContext('2d')
-            ctx.drawImage(this.img, 0, 0)
+            if (!this.useShader) {
+                // if just canvas (or missing a fragment shader),
+                // draw the image and be done
+                const ctx = canvas.getContext('2d')
+                ctx.drawImage(this.img, 0, 0)
+            } else {
+                // otherwise, boot up phenomenon...
+                if (!Phenomenon) {
+                    Phenomenon = require('phenomenon').default
+                }
+
+                // ...save the fragment shader...
+                let fragment = this.$slots.default[0].elm.innerHTML
+
+                // ...prep the uniforms...
+                // (include time and resolution as default uniforms)
+                const startingUniforms = {
+                    uTime: {
+                        type: 'float',
+                        value: 1.0
+                    },
+                    uResolution: {
+                        type: 'vec2',
+                        value: [canvas.width, canvas.height]
+                    },
+                    uSampler: {
+                        type: 'texture2D',
+                        value: this.img
+                    },
+                    ...this.uniforms
+                }
+
+                // ...build the render function...
+                const render = uniforms => {
+                    if (uniforms.uTime) {
+                        // (if you want timescaling, add it here - this is ~60fps)
+                        uniforms.uTime.value += 0.01666
+                    }
+                    if (uniforms.uResolution && canvas) {
+                        uniforms.uResolution.value = [
+                            canvas.width,
+                            canvas.height
+                        ]
+                    }
+                    // update passed uniforms each frame
+                    if (this.uniforms) {
+                        Object.keys(this.uniforms)
+                            .filter(Boolean)
+                            .forEach(u => {
+                                uniforms[u].value = this.uniforms[u].value
+                            })
+                    }
+                    // allow custom render function to be passed as prop
+                    if (this.render && this.alive) {
+                        this.render(uniforms)
+                    }
+                }
+
+                console.log(fragment)
+
+                // and build the shader
+                buildShader(
+                    Phenomenon,
+                    fragment,
+                    startingUniforms,
+                    render,
+                    canvas
+                )
+            }
         }
     },
     computed: {
@@ -168,7 +248,7 @@ export default {
         },
         imageTag() {
             if (this.html) return this.html
-            else if (this.useCanvas) return this.cmpCanvas
+            else if (this.useCanvas || this.useShader) return this.cmpCanvas
             else return this.fallbackHtml
         },
         outerStyles() {
@@ -220,7 +300,43 @@ export default {
             }
             return output
         }
+    },
+    beforeDestroy() {
+        this.alive = false
     }
+}
+
+// This is a modified version of the phenomenon-px package
+// The main difference is that you need to pass in the Phenomenon class
+const min = -2
+const max = 2
+
+const buildShader = function(Phenom, fragment, uniforms, render, canvas) {
+    new Phenom({ canvas, position: { x: 0, y: 0, z: 100 } }).add(Date.now(), {
+        vertex: `
+      attribute vec3 aPosition;
+      uniform mat4 uProjectionMatrix;
+      uniform mat4 uModelMatrix;
+      uniform mat4 uViewMatrix;
+      void main(){
+        gl_Position = uProjectionMatrix * uModelMatrix * uViewMatrix * vec4(aPosition, 1.0);
+      }
+    `,
+        fragment,
+        uniforms,
+        mode: 4,
+        onRender: p => render(p.uniforms),
+        geometry: {
+            vertices: [
+                { x: min, y: min, z: 0 },
+                { x: min, y: max, z: 0 },
+                { x: max, y: min, z: 0 },
+                { x: max, y: max, z: 0 },
+                { x: min, y: max, z: 0 },
+                { x: max, y: min, z: 0 }
+            ]
+        }
+    })
 }
 </script>
 

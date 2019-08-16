@@ -35,6 +35,21 @@
 
         <!-- canvas for easier manipulation -->
         <super-image src="//placehold.it/400x200" use-canvas />
+
+        <!-- shader example (!) -->
+        <super-image src="//placehold.it/400x200" use-shader>
+            <script type="shader/fragment">
+                precision highp float;
+                uniform vec2 uResolution;
+                uniform float uTime;
+                uniform sampler2D uSampler;
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / uResolution.xy;
+                    vec4 baseColor = texture2D(uSampler, uv);
+                    gl_FragColor = baseColor * vec4(uv.x, 0.2, 0.2, 1.);
+                }
+            </script>
+        </super-image>
     </main>
 </template>
 
