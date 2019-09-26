@@ -37,16 +37,16 @@
         <super-image src="//placehold.it/400x200" use-canvas />
 
         <!-- shader example (!) -->
-        <super-image src="//placehold.it/400x200" use-shader>
+        <super-image src="//i.imgur.com/xPTxqH4.png" use-shader>
             <script type="shader/fragment">
                 precision highp float;
                 uniform vec2 uResolution;
                 uniform float uTime;
-                uniform sampler2D uSampler;
+                // uniform sampler2D uSampler;
                 void main() {
                     vec2 uv = gl_FragCoord.xy / uResolution.xy;
-                    vec4 baseColor = texture2D(uSampler, uv);
-                    gl_FragColor = baseColor * vec4(uv.x, 0.2, 0.2, 1.);
+                    vec4 baseColor = vec4(uv.x, uv.y, 1, 1);//texture2D(uSampler, uv);
+                    gl_FragColor = baseColor;
                 }
             </script>
         </super-image>

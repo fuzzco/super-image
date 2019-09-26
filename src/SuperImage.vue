@@ -24,6 +24,7 @@
 <script>
 let imagesLoaded
 let Phenomenon
+import addShader from './shaders/index'
 
 export default {
     name: 'super-image',
@@ -104,7 +105,6 @@ export default {
         if (!this.src) return
 
         this.img = new Image()
-        this.img.src = this.src
 
         // define loading complete handler
         const onComplete = async () => {
@@ -121,6 +121,9 @@ export default {
                 this.refreshCanvas()
             }
         }
+
+        this.img.src = this.src
+        // this.img.crossOrigin = ''
 
         // image was already in cache,
         // handle complete immediately
@@ -142,7 +145,7 @@ export default {
                 if (media) media.classList.add('media')
             })
         },
-        refreshCanvas() {
+        async refreshCanvas() {
             const canvas = this.$el.querySelector('canvas')
 
             // cancel if no canvas
@@ -158,10 +161,23 @@ export default {
                 const ctx = canvas.getContext('2d')
                 ctx.drawImage(this.img, 0, 0)
             } else {
+                // otherwise, boot up a shader instance!
+                addShader(canvas)
+
+                // end dev
+                return
                 // otherwise, boot up phenomenon...
+
                 if (!Phenomenon) {
                     Phenomenon = require('phenomenon').default
                 }
+
+                // need to load textures manually - see:
+                // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL
+                // ...save the webgl context...
+                const gl = canvas.getContext('webgl')
+
+                const texture = await loadTexture(gl, this.img.src)
 
                 // ...save the fragment shader...
                 let fragment = this.$slots.default[0].elm.innerHTML
@@ -177,10 +193,10 @@ export default {
                         type: 'vec2',
                         value: [canvas.width, canvas.height]
                     },
-                    uSampler: {
-                        type: 'texture2D',
-                        value: this.img
-                    },
+                    // uSampler: {
+                    //     type: 'sampler2D',
+                    //     value: this.img
+                    // },
                     ...this.uniforms
                 }
 
@@ -209,9 +225,6 @@ export default {
                         this.render(uniforms)
                     }
                 }
-
-                console.log(fragment)
-
                 // and build the shader
                 buildShader(
                     Phenomenon,
