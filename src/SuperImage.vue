@@ -24,7 +24,7 @@
 <script>
 let imagesLoaded
 let Phenomenon
-import addShader from './shaders/index'
+import addShader from './shaders'
 
 export default {
     name: 'super-image',
@@ -162,7 +162,22 @@ export default {
                 ctx.drawImage(this.img, 0, 0)
             } else {
                 // otherwise, boot up a shader instance!
-                addShader(canvas)
+
+                // save the user-defined fragment shader and the default vertex shader
+                const fragmentSrc = this.$slots.default[0].elm.innerHTML
+                const vertexSrc = `
+    attribute vec4 aVertexPosition;
+
+    uniform mat4 uModelViewMatrix;
+    uniform mat4 uProjectionMatrix;
+
+    void main() {
+      gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+    }
+`
+
+                // build out the shader data
+                addShader(canvas, vertexSrc, fragmentSrc)
 
                 // end dev
                 return

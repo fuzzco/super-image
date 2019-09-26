@@ -1,14 +1,8 @@
-import loadShader from './load-shader'
-
 //
 // Initialize a shader program, so WebGL knows how to draw our data
 //
-export default function(gl, vsSource, fsSource) {
-    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource)
-    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource)
-
+export default function(gl, vertexShader, fragmentShader) {
     // Create the shader program
-
     const shaderProgram = gl.createProgram()
     gl.attachShader(shaderProgram, vertexShader)
     gl.attachShader(shaderProgram, fragmentShader)

@@ -24,6 +24,7 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
+        "gl-matrix": "^3.1.0",
         "imagesloaded": "^4.1.4",
         "phenomenon": "^1.5.1",
         "vue": "^2.6.10"
