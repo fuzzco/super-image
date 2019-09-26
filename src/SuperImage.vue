@@ -22,9 +22,8 @@
 </template>
 
 <script>
+import buildShader from './shader'
 let imagesLoaded
-let Phenomenon
-import addShader from './shaders'
 
 export default {
     name: 'super-image',
@@ -75,6 +74,10 @@ export default {
             type: Boolean,
             default: false
         },
+        shaderOptions: {
+            type: Object,
+            default: () => {}
+        },
         uniforms: {
             type: Object,
             default: () => {}
@@ -92,14 +95,12 @@ export default {
             img: null,
             alive: true,
             vertexSrc: `
-attribute vec4 aVertexPosition;
-attribute vec4 aTextureCoord;
-
-uniform mat4 uModelViewMatrix;
+attribute vec3 aPosition;
 uniform mat4 uProjectionMatrix;
-
-void main() {
-  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+uniform mat4 uModelMatrix;
+uniform mat4 uViewMatrix;
+void main(){
+gl_Position = uProjectionMatrix * uModelMatrix * uViewMatrix * vec4(aPosition, 1.0);
 }
 `
         }
@@ -173,85 +174,7 @@ void main() {
                 ctx.drawImage(this.img, 0, 0)
             } else {
                 // otherwise, boot up a shader instance!
-
-                // save the user-defined fragment shader and the default vertex shader
-                const fragmentSrc = this.$slots.default[0].elm.innerHTML
-                const vertexSrc = this.vertexSrc
-
-                // build out the shader data
-                addShader(canvas, vertexSrc, fragmentSrc)
-
-                requestAnimationFrame(this.refreshCanvas)
-
-                // end dev
-                return
-                // otherwise, boot up phenomenon...
-
-                if (!Phenomenon) {
-                    Phenomenon = require('phenomenon').default
-                }
-
-                // need to load textures manually - see:
-                // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL
-                // ...save the webgl context...
-                const gl = canvas.getContext('webgl')
-
-                const texture = await loadTexture(gl, this.img.src)
-
-                // ...save the fragment shader...
-                let fragment = this.$slots.default[0].elm.innerHTML
-
-                // ...prep the uniforms...
-                // (include time and resolution as default uniforms)
-                const startingUniforms = {
-                    uTime: {
-                        type: 'float',
-                        value: 1.0
-                    },
-                    uResolution: {
-                        type: 'vec2',
-                        value: [canvas.width, canvas.height]
-                    },
-                    // uSampler: {
-                    //     type: 'sampler2D',
-                    //     value: this.img
-                    // },
-                    ...this.uniforms
-                }
-
-                // ...build the render function...
-                const render = uniforms => {
-                    if (uniforms.uTime) {
-                        // (if you want timescaling, add it here - this is ~60fps)
-                        uniforms.uTime.value += 0.01666
-                    }
-                    if (uniforms.uResolution && canvas) {
-                        uniforms.uResolution.value = [
-                            canvas.width,
-                            canvas.height
-                        ]
-                    }
-                    // update passed uniforms each frame
-                    if (this.uniforms) {
-                        Object.keys(this.uniforms)
-                            .filter(Boolean)
-                            .forEach(u => {
-                                uniforms[u].value = this.uniforms[u].value
-                            })
-                    }
-                    // allow custom render function to be passed as prop
-                    if (this.render && this.alive) {
-                        this.render(uniforms)
-                    }
-                }
-                // and build the shader
-                buildShader(
-                    Phenomenon,
-                    fragment,
-                    startingUniforms,
-                    render,
-                    canvas
-                )
+                buildShader(this)
             }
         }
     },
@@ -338,38 +261,38 @@ void main() {
     }
 }
 
-// This is a modified version of the phenomenon-px package
-// The main difference is that you need to pass in the Phenomenon class
-const min = -2
-const max = 2
-
-const buildShader = function(Phenom, fragment, uniforms, render, canvas) {
-    new Phenom({ canvas, position: { x: 0, y: 0, z: 100 } }).add(Date.now(), {
-        vertex: `
-      attribute vec3 aPosition;
-      uniform mat4 uProjectionMatrix;
-      uniform mat4 uModelMatrix;
-      uniform mat4 uViewMatrix;
-      void main(){
-        gl_Position = uProjectionMatrix * uModelMatrix * uViewMatrix * vec4(aPosition, 1.0);
-      }
-    `,
-        fragment,
-        uniforms,
-        mode: 4,
-        onRender: p => render(p.uniforms),
-        geometry: {
-            vertices: [
-                { x: min, y: min, z: 0 },
-                { x: min, y: max, z: 0 },
-                { x: max, y: min, z: 0 },
-                { x: max, y: max, z: 0 },
-                { x: min, y: max, z: 0 },
-                { x: max, y: min, z: 0 }
-            ]
-        }
-    })
-}
+// // This is a modified version of the phenomenon-px package
+// // The main difference is that you need to pass in the Phenomenon class
+// const min = -2
+// const max = 2
+//
+// const buildShader = function(Phenom, fragment, uniforms, render, canvas) {
+//     new Phenom({ canvas, position: { x: 0, y: 0, z: 100 } }).add(Date.now(), {
+//         vertex: `
+//       attribute vec3 aPosition;
+//       uniform mat4 uProjectionMatrix;
+//       uniform mat4 uModelMatrix;
+//       uniform mat4 uViewMatrix;
+//       void main(){
+//         gl_Position = uProjectionMatrix * uModelMatrix * uViewMatrix * vec4(aPosition, 1.0);
+//       }
+//     `,
+//         fragment,
+//         uniforms,
+//         mode: 4,
+//         onRender: p => render(p.uniforms),
+//         geometry: {
+//             vertices: [
+//                 { x: min, y: min, z: 0 },
+//                 { x: min, y: max, z: 0 },
+//                 { x: max, y: min, z: 0 },
+//                 { x: max, y: max, z: 0 },
+//                 { x: min, y: max, z: 0 },
+//                 { x: max, y: min, z: 0 }
+//             ]
+//         }
+//     })
+// }
 </script>
 
 <style lang="scss">
