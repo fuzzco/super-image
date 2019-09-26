@@ -39,13 +39,14 @@
         <!-- shader example (!) -->
         <super-image src="//i.imgur.com/xPTxqH4.png" use-shader>
             <script type="shader/fragment">
+
                 precision highp float;
-                uniform vec2 uResolution;
-                uniform float uTime;
+                // uniform vec2 uResolution;
+                // uniform float uTime;
                 // uniform sampler2D uSampler;
                 void main() {
-                    vec2 uv = gl_FragCoord.xy / uResolution.xy;
-                    vec4 baseColor = vec4(uv.x, uv.y, 1, 1);//texture2D(uSampler, uv);
+                    vec2 uv = gl_FragCoord.xy;
+                    vec4 baseColor = vec4(uv.x, uv.y, 0.0, 1.0);//texture2D(uSampler, uv);
                     gl_FragColor = baseColor;
                 }
             </script>

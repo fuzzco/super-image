@@ -90,7 +90,18 @@ export default {
             imageWidth: 0,
             imageHeight: 0,
             img: null,
-            alive: true
+            alive: true,
+            vertexSrc: `
+attribute vec4 aVertexPosition;
+attribute vec4 aTextureCoord;
+
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+
+void main() {
+  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+}
+`
         }
     },
     watch: {
@@ -165,19 +176,12 @@ export default {
 
                 // save the user-defined fragment shader and the default vertex shader
                 const fragmentSrc = this.$slots.default[0].elm.innerHTML
-                const vertexSrc = `
-    attribute vec4 aVertexPosition;
-
-    uniform mat4 uModelViewMatrix;
-    uniform mat4 uProjectionMatrix;
-
-    void main() {
-      gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-    }
-`
+                const vertexSrc = this.vertexSrc
 
                 // build out the shader data
                 addShader(canvas, vertexSrc, fragmentSrc)
+
+                requestAnimationFrame(this.refreshCanvas)
 
                 // end dev
                 return

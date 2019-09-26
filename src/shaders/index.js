@@ -22,7 +22,8 @@ export default (canvas, vertexSrc, fragmentSrc) => {
             vertexPosition: gl.getAttribLocation(
                 shaderProgram,
                 'aVertexPosition'
-            )
+            ),
+            textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord')
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(
