@@ -45,7 +45,7 @@
                 // uniform float uTime;
                 // uniform sampler2D uSampler;
                 void main() {
-                    vec2 uv = gl_FragCoord.xy;
+                    vec2 uv = gl_FragCoord.xy * 0.001;
                     vec4 baseColor = vec4(uv.x, uv.y, 0.0, 1.0);//texture2D(uSampler, uv);
                     gl_FragColor = baseColor;
                 }

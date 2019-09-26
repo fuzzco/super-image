@@ -7,7 +7,7 @@ export default function initBuffers(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
 
     // Now create an array of positions for the square.
-    const positions = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0]
+    const positions = [-3.38, 2.5, 3.38, 2.5, -3.38, -2.5, 3.38, -2.5]
 
     // Now pass the list of positions into WebGL to build the
     // shape. We do this by creating a Float32Array from the
